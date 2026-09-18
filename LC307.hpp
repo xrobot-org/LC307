@@ -36,17 +36,22 @@ class LC307
   };
 #pragma pack(pop)
 
-  LC307(LibXR::UART& external_uart_name, LibXR::RamFS& external_ramfs,
-        const char* topic_name, size_t task_stack_depth, bool configure_on_boot = true,
-        uint32_t init_timeout_ms = 1500, uint32_t frame_timeout_ms = 200)
+  LC307(
+      LibXR::UART& uart,
+      LibXR::RamFS& ramfs,
+      const char* topic_name = "lc307_flow",
+      size_t task_stack_depth = 2048,
+      bool configure_on_boot = true,
+      uint32_t init_timeout_ms = 1500,
+      uint32_t frame_timeout_ms = 200)
       : configure_on_boot_(configure_on_boot),
         init_timeout_ms_(init_timeout_ms),
         frame_timeout_ms_(frame_timeout_ms),
         topic_(LibXR::Topic::CreateTopic<Sample>(topic_name)),
-        uart_(std::addressof(external_uart_name)),
+        uart_(std::addressof(uart)),
         cmd_file_(LibXR::RamFS::CreateCommand("lc307", CommandFunc, this))
   {
-    external_ramfs.bin_.Add(cmd_file_);
+    ramfs.bin_.Add(cmd_file_);
 
     while (!Init())
     {
