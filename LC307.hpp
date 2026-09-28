@@ -62,8 +62,6 @@ class LC307
                    LibXR::Thread::Priority::REALTIME);
   }
 
-  void OnMonitor() {}
-
  private:
 #pragma pack(push, 1)
   struct RawFrame
