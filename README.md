@@ -27,7 +27,7 @@ Topic 发布的类型为 `LC307::Sample`：
 | 字段 | 说明 |
 | --- | --- |
 | `flow_x_raw`、`flow_y_raw` | 帧中的原始光流值（`int16_t`） |
-| `flow_x_at_1m_mps`、`flow_y_at_1m_mps` | 原始光流值的 `float` 形式，数值与原始值相同 |
+| `flow_x_raw_f`、`flow_y_raw_f` | 原始光流值的 `float` 形式，数值与原始值相同 |
 | `integration_time` | 帧中的积分时间字段 |
 | `distance_mm` | 帧中的距离字段，单位 mm |
 | `distance_m` | `distance_mm / 1000`，单位 m |
@@ -39,7 +39,7 @@ The Topic publishes the type `LC307::Sample`:
 | Field | Meaning |
 | --- | --- |
 | `flow_x_raw`, `flow_y_raw` | Raw flow values from the frame (`int16_t`) |
-| `flow_x_at_1m_mps`, `flow_y_at_1m_mps` | The raw flow values as `float`, numerically equal to the raw values |
+| `flow_x_raw_f`, `flow_y_raw_f` | The raw flow values as `float`, numerically equal to the raw values |
 | `integration_time` | Integration-time field of the frame |
 | `distance_mm` | Distance field of the frame, in mm |
 | `distance_m` | `distance_mm / 1000`, in m |

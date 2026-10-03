@@ -37,9 +37,9 @@ class LC307
                                 ///< Raw X flow value from the frame
     int16_t flow_y_raw;         ///< 帧中的 Y 方向原始光流值
                                 ///< Raw Y flow value from the frame
-    float flow_x_at_1m_mps;     ///< flow_x_raw 的 float 形式，数值相同
+    float flow_x_raw_f;         ///< flow_x_raw 的 float 形式，数值相同
                                 ///< flow_x_raw as float, numerically equal
-    float flow_y_at_1m_mps;     ///< flow_y_raw 的 float 形式，数值相同
+    float flow_y_raw_f;         ///< flow_y_raw 的 float 形式，数值相同
                                 ///< flow_y_raw as float, numerically equal
     uint16_t integration_time;  ///< 帧中的积分时间字段
                                 ///< Integration-time field of the frame
@@ -343,8 +343,8 @@ class LC307
 
     sample_.flow_x_raw = frame.flow_x;
     sample_.flow_y_raw = frame.flow_y;
-    sample_.flow_x_at_1m_mps = static_cast<float>(frame.flow_x);
-    sample_.flow_y_at_1m_mps = static_cast<float>(frame.flow_y);
+    sample_.flow_x_raw_f = static_cast<float>(frame.flow_x);
+    sample_.flow_y_raw_f = static_cast<float>(frame.flow_y);
     sample_.integration_time = frame.timespan;
     sample_.distance_mm = frame.distance;
     sample_.distance_m = static_cast<float>(frame.distance) / 1000.0f;
