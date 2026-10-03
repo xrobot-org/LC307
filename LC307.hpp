@@ -166,8 +166,10 @@ class LC307
   {
     init_ok_ = false;
 
-    const auto config_ans =
-        uart_->SetConfig({19200, LibXR::UART::Parity::NO_PARITY, 8, 1});
+    const auto config_ans = uart_->SetConfig({.baudrate = 19200,
+                                              .parity = LibXR::UART::Parity::NO_PARITY,
+                                              .data_bits = 8,
+                                              .stop_bits = 1});
     if (config_ans != LibXR::ErrorCode::OK)
     {
       return false;
