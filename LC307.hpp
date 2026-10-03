@@ -18,24 +18,64 @@ depends: []
 #include "thread.hpp"
 #include "uart.hpp"
 
+/**
+ * @brief LC307 光流传感器驱动模块，解析 UART 数据流并发布光流与距离样本。
+ *        Driver Module for the LC307 optical-flow sensor; it parses the UART stream and
+ *        publishes optical-flow and distance samples.
+ */
 class LC307
 {
  public:
 #pragma pack(push, 1)
+  /**
+   * @brief 发布的样本，字段紧凑排列。
+   *        Published sample with packed fields.
+   */
   struct Sample
   {
-    int16_t flow_x_raw;
-    int16_t flow_y_raw;
-    float flow_x_at_1m_mps;
-    float flow_y_at_1m_mps;
-    uint16_t integration_time;
-    uint16_t distance_mm;
-    float distance_m;
-    uint8_t quality;
-    uint8_t version;
+    int16_t flow_x_raw;         ///< 帧中的 X 方向原始光流值
+                                ///< Raw X flow value from the frame
+    int16_t flow_y_raw;         ///< 帧中的 Y 方向原始光流值
+                                ///< Raw Y flow value from the frame
+    float flow_x_at_1m_mps;     ///< flow_x_raw 的 float 形式，数值相同
+                                ///< flow_x_raw as float, numerically equal
+    float flow_y_at_1m_mps;     ///< flow_y_raw 的 float 形式，数值相同
+                                ///< flow_y_raw as float, numerically equal
+    uint16_t integration_time;  ///< 帧中的积分时间字段
+                                ///< Integration-time field of the frame
+    uint16_t distance_mm;       ///< 帧中的距离字段 (mm)
+                                ///< Distance field of the frame (mm)
+    float distance_m;           ///< 距离 (m)，等于 distance_mm / 1000
+                                ///< Distance (m), equal to distance_mm / 1000
+    uint8_t quality;            ///< 帧中的质量字段
+                                ///< Quality field of the frame
+    uint8_t version;            ///< 帧中的版本字段
+                                ///< Version field of the frame
   };
 #pragma pack(pop)
 
+  /**
+   * @brief 构造 LC307：设置 UART、初始化传感器（失败时每 100 ms 重试）并创建接收线程。
+   *        Construct LC307: set up the UART, initialize the sensor (retrying every
+   *        100 ms on failure) and create the receive thread.
+   *
+   * @param uart 连接 LC307 的 UART，模块将其设置为 19200、8N1。
+   *             UART connected to the LC307; the Module sets it to 19200, 8N1.
+   * @param ramfs 接收 `lc307` 命令的 RamFS。
+   *              RamFS that receives the `lc307` command.
+   * @param topic_name 发布样本的 Topic 名称。
+   *                   Name of the Topic that publishes the samples.
+   * @param task_stack_depth 接收线程栈深。
+   *                         Stack depth of the receive thread.
+   * @param configure_on_boot 启动时没有收到帧则发送初始化序列。
+   *                          Send the initialization sequence when no frame is received
+   *                          at start-up.
+   * @param init_timeout_ms 启动时等待第一帧的时间，单位 ms。
+   *                        How long start-up waits for the first frame, in ms.
+   * @param frame_timeout_ms 接收线程每次等待 UART 数据的超时，单位 ms。
+   *                         Timeout of each wait for UART data in the receive thread, in
+   *                         ms.
+   */
   LC307(
       LibXR::UART& uart,
       LibXR::RamFS& ramfs,
