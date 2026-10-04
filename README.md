@@ -6,19 +6,19 @@ UPIXELS LC307 光流传感器（UART）驱动模块 / Driver Module for the UPIX
 
 构造时，LC307 把 UART 设置为 19200 波特、8N1，丢弃已收到的数据，并等待至多 `init_timeout_ms` 毫秒以收到一帧有效数据。未收到且 `configure_on_boot` 为 `true` 时，模块发送 LC307 初始化序列和 BF3901 图像传感器寄存器表（每个数据包需在 200 ms 内得到应答），随后关闭配置模式并开始输出数据流。`configure_on_boot` 为 `false` 时，未收到帧视为初始化成功。初始化失败时每 100 ms 重试，构造函数在成功后返回。
 
-随后线程 `lc307_thread`（REALTIME 优先级）解析字节流：帧长 14 字节，以 `0xFE` 开头，对第 2 到第 11 字节做异或校验。校验错误的帧被计数并丢弃，每个有效帧都发布一次。
+随后线程 `lc307_thread`（REALTIME 优先级）解析字节流：帧长 14 字节，以 `0xFE` 开头，对从 0 计的第 2 到第 11 字节做异或校验，校验值位于第 12 字节。校验错误的帧被计数并丢弃，每个有效帧都发布一次。
 
 模块在 RamFS 的 `bin` 目录注册命令 `lc307`：
 
-- `lc307` 或 `lc307 status`：打印初始化标志、有效帧与错误帧计数、最近一次的距离（m）和质量。
+- `bin/lc307` 或 `bin/lc307 status`：打印初始化标志、有效帧与错误帧计数、最近一次的距离（m）和质量。
 
 Upon construction, LC307 sets the UART to 19200 baud, 8N1, discards pending input and waits up to `init_timeout_ms` ms for a valid frame. When none arrives and `configure_on_boot` is `true`, the Module sends the LC307 initialization sequence and the BF3901 image-sensor register table (each packet must be acknowledged within 200 ms), then closes configuration mode and starts the data stream. When `configure_on_boot` is `false`, a missing frame counts as a successful initialization. A failed initialization is retried every 100 ms, and the constructor returns after it succeeds.
 
-The thread `lc307_thread` (REALTIME priority) then parses the byte stream: frames are 14 bytes long, start with `0xFE`, and carry an XOR checksum over bytes 2 to 11. Frames with a wrong checksum are counted and dropped; every valid frame is published once.
+The thread `lc307_thread` (REALTIME priority) then parses the byte stream: frames are 14 bytes long, start with `0xFE`, and carry an XOR checksum of bytes 2 to 11 (counted from 0) in byte 12. Frames with a wrong checksum are counted and dropped; every valid frame is published once.
 
 The Module registers the command `lc307` in the RamFS `bin` directory:
 
-- `lc307` or `lc307 status`: print the initialization flag, the counters of valid and bad frames, and the last distance (m) and quality.
+- `bin/lc307` or `bin/lc307 status`: print the initialization flag, the counters of valid and bad frames, and the last distance (m) and quality.
 
 ## 2. 样本字段 / Sample Fields
 
@@ -65,7 +65,7 @@ LC307(LibXR::UART& uart, LibXR::RamFS& ramfs,
 配置参数：
 
 - `topic_name`：发布的 Topic 名称，默认 `"lc307_flow"`。
-- `task_stack_depth`：接收线程栈深，默认 2048。
+- `task_stack_depth`：接收线程栈深，单位字节，默认 2048。
 - `configure_on_boot`：启动时没有收到帧则发送初始化序列，默认 `true`。
 - `init_timeout_ms`：启动时等待第一帧的时间，单位 ms，默认 1500。
 - `frame_timeout_ms`：接收线程每次等待 UART 数据的超时，单位 ms，默认 200；超时后重新开始等待。
@@ -78,7 +78,7 @@ Dependencies:
 Configuration parameters:
 
 - `topic_name`: name of the published Topic, default `"lc307_flow"`.
-- `task_stack_depth`: stack depth of the receive thread, default 2048.
+- `task_stack_depth`: stack depth of the receive thread in bytes, default 2048.
 - `configure_on_boot`: send the initialization sequence when no frame is received at start-up, default `true`.
 - `init_timeout_ms`: how long start-up waits for the first frame, in ms, default 1500.
 - `frame_timeout_ms`: timeout of each wait for UART data in the receive thread, in ms, default 200; after a timeout the wait restarts.
